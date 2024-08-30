@@ -25,7 +25,7 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					if c.Bool("tui") {
-						return tui.RunTUI()
+						tui.RunTUI()
 					}
 					fmt.Println("Running in CLI mode")
 					return nil

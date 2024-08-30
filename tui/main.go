@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -12,15 +12,15 @@ import (
 // RunTUI starts the TUI program.
 func RunTUI() {
 	f, err := tea.LogToFile("debug.log", "debug")
-	fmt.Println("Running TUI!!")
+	log.Println("Running TUI!!")
 	if err != nil {
-		fmt.Printf("RunTUI Logging - %v", err)
+		log.Printf("RunTUI Logging - %v", err)
 		os.Exit(1)
 	}
 	defer f.Close()
 	p := tea.NewProgram(models.InitialModel())
 	if _, err := p.Run(); err != nil {
-		fmt.Printf("RunTUI error - %v", err)
+		log.Printf("RunTUI error - %v", err)
 		os.Exit(1)
 	}
 }
