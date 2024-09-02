@@ -19,7 +19,8 @@ var (
 type Model struct {
 	list list.Model
 
-	loaded bool
+	loaded  bool
+	message string
 }
 
 // Image represents an individual image in the report
@@ -71,6 +72,7 @@ func InitialModel(data ImageReport) *Model {
 func (m *Model) initList(width, height int) {
 	m.list = list.New([]list.Item{}, list.NewDefaultDelegate(), width, height)
 	m.list.Title = "Image Viewer"
+	m.list.SetStatusBarItemName("image", "images")
 	m.list.SetShowHelp(false)
 }
 
@@ -92,6 +94,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit // Quit the program.
+		case "z":
+			m.message = "Handle error message displays here"
+			return m, nil
 		}
 	}
 	return m, nil
@@ -99,11 +104,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View returns the view that should be displayed.
 func (m Model) View() string {
+	var statusBar string
+
+	// Display messages to the user
+	if m.message != "" {
+		// Second argument should be informed based on terminal width
+		statusBar = RightPadTrim(m.message, 1000)
+	}
+
 	if m.loaded {
 		imagesView := m.list.View()
-		return lipgloss.JoinHorizontal(
+		content := lipgloss.JoinHorizontal(
 			lipgloss.Left,
 			columnStyle.Render(imagesView),
+		)
+		footerStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#282828")).
+			Background(lipgloss.Color("#7c6f64"))
+		footerStr := "Press q to quit"
+		footer := footerStyle.Render(footerStr)
+		return lipgloss.JoinVertical(lipgloss.Left,
+			content,
+			statusBar,
+			footer,
 		)
 	} else {
 		return "loading"
