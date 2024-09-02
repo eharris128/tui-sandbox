@@ -1,24 +1,17 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Styling
-var (
-	columnStyle = lipgloss.NewStyle().Padding(1, 2)
-)
-
 // Model represents the state of the TUI.
 type Model struct {
-	list list.Model
-
+	table   table.Model
 	loaded  bool
 	message string
 }
@@ -38,42 +31,30 @@ type ImageReport struct {
 	Images []Image `json:"images"`
 }
 
-type item struct {
-	name string
-	size string
-}
-
-func (i item) Title() string {
-	return i.name
-}
-
-func (i item) Description() string {
-	return fmt.Sprintf("Size: %v", i.size)
-}
-
-func (i item) FilterValue() string { return i.name }
-
 // InitialModel returns the initial state of the model.
 func InitialModel(data ImageReport) *Model {
-	var items []list.Item
+	var rows []table.Row
 	for _, imageInfo := range data.Images {
-		image := item{
-			name: imageInfo.Name,
-			size: imageInfo.Size,
-		}
-		items = append(items, image)
+		// Should shorten the imageInfo.ID.
+		imageRow := []string{imageInfo.Name, imageInfo.ID, imageInfo.Created.String(), imageInfo.Size}
+		rows = append(rows, imageRow)
 	}
 	m := &Model{}
-	m.initList(90, 32)
-	m.list.SetItems(items)
-	return m
-}
+	columns := []table.Column{
+		{Title: "Name", Width: 30},
+		{Title: "Image ID", Width: 30},
+		{Title: "Created", Width: 30},
+		{Title: "Size", Width: 8},
+	}
+	table := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithFocused(true),
+		table.WithHeight(7),
+	)
 
-func (m *Model) initList(width, height int) {
-	m.list = list.New([]list.Item{}, list.NewDefaultDelegate(), width, height)
-	m.list.Title = "Image Viewer"
-	m.list.SetStatusBarItemName("image", "images")
-	m.list.SetShowHelp(false)
+	m.table = table
+	return m
 }
 
 func (m Model) Init() tea.Cmd {
@@ -86,8 +67,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		if !m.loaded {
-			columnStyle.Width(msg.Width)
-			columnStyle.Height(int(float64(msg.Height) * .5))
 			m.loaded = true
 		}
 	case tea.KeyMsg:
@@ -113,14 +92,12 @@ func (m Model) View() string {
 	}
 
 	if m.loaded {
-		imagesView := m.list.View()
-		content := lipgloss.JoinHorizontal(
-			lipgloss.Left,
-			columnStyle.Render(imagesView),
-		)
+		content := m.table.View()
+
 		footerStyle := lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#282828")).
 			Background(lipgloss.Color("#7c6f64"))
+
 		footerStr := "Press q to quit"
 		footer := footerStyle.Render(footerStr)
 		return lipgloss.JoinVertical(lipgloss.Left,
