@@ -1,0 +1,6 @@
+{
+    "images": [
+        {"cmd":"images","created":"2024-08-14T23:31:12+02:00","id":"sha256:5ef79149e0ec84a7a9f9284c3f91aa3c20608f8391f5445eabe92ef07dbda03c","info":"image","name":"nginx:latest","size":"188 MB"},
+        {"cmd":"images","created":"2023-05-19T00:34:17+02:00","id":"sha256:65ad0d468eb1c558bf7f4e64e790f586e9eda649ee9f130cd0e835b292bbc5ac","info":"image","name":"busybox:latest","size":"4.3 MB"}
+    ]
+}

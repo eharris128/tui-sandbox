@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/eharris128/tui-sandbox/tui"
+	"github.com/eharris128/tui-sandbox/pkg/app/master/tui"
 	"github.com/urfave/cli/v2"
 )
 
